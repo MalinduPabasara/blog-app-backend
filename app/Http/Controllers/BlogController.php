@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\BlogService;
 use Illuminate\Http\Request;
-use App\Models\Blog;
+use App\Http\Requests\BlogValidationRequest;
 
 class BlogController extends Controller
 {
@@ -27,23 +27,16 @@ class BlogController extends Controller
      */
     public function index()
     {
-        $result = Blog::all();
+        $blogs = $this->blogService->getAllBlogs();
 
-        return response()->json($result);
+        return response()->json($blogs);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(BlogValidationRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'blog_content' => 'required',
-            'tag' => 'required',
-            'date' => 'required'
-        ]);
-
         $result = $this->blogService->addBlog($request);
 
         return response()->json($result);
@@ -54,24 +47,16 @@ class BlogController extends Controller
      */
     public function show($id)
     {
-        $post = Blog::find($id);
+        $blog = $this->blogService->getBlog($id);
 
-        return response()->json($post);
+        return response()->json($blog);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(BlogValidationRequest $request, $id)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'blog_content' => 'required',
-            'tag' => 'required',
-            'date' => 'required',
-            'status' => 'required'
-        ]);
-
         $result = $this->blogService->updateBlog($request, $id);
 
         return response()->json($result);
@@ -82,21 +67,17 @@ class BlogController extends Controller
      */
     public function destroy(string $id)
     {
-        $post = Blog::find($id);
+        $result = $this->blogService->deleteBlog($id);
 
-        $post->delete();
-
-        return response()->json(['message' => 'Blog Deleted Id->' . $post->id], 201);
+        return response()->json($result, isset($result['error']) ? 404 : 201);
     }
 
     public function disable(Request $request, $id)
     {
-        $blog = Blog::find($id);
+        $status = $request->status;
 
-        $blog->status = $request->status;
+        $result = $this->blogService->disableBlog($id, $status);
 
-        $blog->save();
-
-        return response()->json(['message' => 'Status Updated'], 201);
+        return response()->json($result, isset($result['error']) ? 404 : 201);;
     }
 }
