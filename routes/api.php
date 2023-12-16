@@ -19,11 +19,11 @@ use App\Http\Controllers\BlogController;
 //public routes
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::get('/blog', [BlogController::class, 'index']);
+
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
-
     //protected
+    Route::get('/blog', [BlogController::class, 'index']);
     Route::post('/blog', [BlogController::class, 'store']);
     Route::post('/blog/{id}', [BlogController::class, 'update']);
     Route::post('/blog/show/{id}', [BlogController::class, 'show']);
